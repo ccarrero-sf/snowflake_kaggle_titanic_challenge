@@ -1,7 +1,7 @@
-USE ROLE ACCOUNTADMIN;
+---USE ROLE ACCOUNTADMIN;
 
 -- Create warehouses
-CREATE WAREHOUSE IF NOT EXISTS TRAIN_WH WITH WAREHOUSE_SIZE='MEDIUM';
+CREATE WAREHOUSE IF NOT EXISTS CC_TRAIN_WH WITH WAREHOUSE_SIZE='MEDIUM';
 CREATE WAREHOUSE IF NOT EXISTS COMPUTE_WH WITH WAREHOUSE_SIZE='X-SMALL';
 
 -- Setup Procedure
@@ -10,10 +10,10 @@ WITH SETUP AS PROCEDURE()
   LANGUAGE PYTHON
   RUNTIME_VERSION = '3.9'
   PACKAGES = ('snowflake-snowpark-python','snowflake-ml-python==1.5.1','snowflake.core==0.8.0')
-  IMPORTS = ('@KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/train.csv',
-             '@KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/test.csv',
-             '@KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/code/helper_functions.py',
-             '@KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/feature_descriptions.json')
+  IMPORTS = ('@CC_KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/train.csv',
+             '@CC_KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/test.csv',
+             '@CC_KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/code/helper_functions.py',
+             '@CC_KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/feature_descriptions.json')
   HANDLER = 'run'
   AS
 $$
@@ -35,17 +35,17 @@ def run(session):
     
     # Create a fresh Schema for this challenge
     root = Root(session)
-    ml_demo_db = root.databases["KAGGLE_TITANIC_CHALLENGE"]
+    ml_demo_db = root.databases["CC_KAGGLE_TITANIC_CHALLENGE"]
     ml_demo_schema = Schema(name="DEVELOPMENT")
     ml_demo_schema = ml_demo_db.schemas.create(ml_demo_schema, mode='or_replace')
     
     # Set context
-    session.use_schema('KAGGLE_TITANIC_CHALLENGE.DEVELOPMENT')
+    session.use_schema('CC_KAGGLE_TITANIC_CHALLENGE.DEVELOPMENT')
     
     # Create Feature Store
     fs = FeatureStore(
         session=session, 
-        database="KAGGLE_TITANIC_CHALLENGE", 
+        database="CC_KAGGLE_TITANIC_CHALLENGE", 
         name="DEVELOPMENT", 
         default_warehouse="COMPUTE_WH",
         creation_mode=CreationMode.CREATE_IF_NOT_EXIST,
@@ -119,7 +119,7 @@ RETURNS STRING
 LANGUAGE PYTHON
 RUNTIME_VERSION = '3.9'
 PACKAGES = ('snowflake-snowpark-python','snowflake-ml-python==1.5.1')
-IMPORTS = ('@KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/test_100_percent.csv')
+IMPORTS = ('@CC_KAGGLE_TITANIC_CHALLENGE.PUBLIC.TITANIC_CHALLENGE_REPO/branches/main/_internal/data/test_100_percent.csv')
 HANDLER = 'calculate_score'
 AS
 $$
